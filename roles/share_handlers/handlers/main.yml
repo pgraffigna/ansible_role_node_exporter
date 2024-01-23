@@ -1,0 +1,20 @@
+---
+- name: recargar prometheus
+  ansible.builtin.systemd:
+    name: prometheus
+    state: restarted
+    enabled: yes
+  listen: servicios_prometheus
+
+- name: recargar exporter
+  ansible.builtin.systemd:
+    daemon_reload: true
+  listen: servicios_exporter
+
+- name: iniciar exporter
+  ansible.builtin.systemd:
+    name: node_exporter
+    state: restarted
+    enabled: yes
+  listen: servicios_exporter
+

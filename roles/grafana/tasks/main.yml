@@ -1,0 +1,59 @@
+---
+- name: Incluye el archivo con las variables
+  ansible.builtin.include_vars:
+    file: vars_main.yml
+
+- name: Borrar viejas llaves de grafana
+  ansible.builtin.file:
+    path: "/usr/share/keyrings/{{ item }}"
+    state: absent
+  loop:
+    - grafana.key
+
+- name: Importar llave
+  ansible.builtin.get_url:
+    url: "{{ grafana_url_key }}"
+    dest: "{{ grafana_dest_key }}"
+    mode: '0644'
+
+- name: Agregar repo
+  ansible.builtin.apt_repository:
+    repo: deb [signed-by={{ grafana_dest_key }}] {{ grafana_url_repo }} stable main
+    filename: grafana
+    state: present
+    update_cache: true
+
+- name: Instalar grafana
+  ansible.builtin.apt:
+    name: [ 'grafana' ]
+    state: latest
+
+- name: copiando archivos de configuración
+  ansible.builtin.template:
+    src: "files/{{ grafana_config }}.j2"
+    dest: "/etc/grafana/{{ grafana_config }}"
+
+- name: Iniciar grafana
+  ansible.builtin.systemd:
+    name: grafana-server
+    state: started
+    enabled: yes
+
+- name: Esperando a que el servicio web esta online
+  uri:
+    url: "http://127.0.0.1:3000"
+    status_code: 200
+  register: resultado
+  until: resultado.status == 200
+  retries: 120
+  delay: 1
+
+- name: Cambiando el password para acceso web
+  shell : "grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
+  register: grafana_admin
+  changed_when: grafana_admin.rc !=0
+
+
+
+
+

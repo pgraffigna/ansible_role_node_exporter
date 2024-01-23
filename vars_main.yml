@@ -1,0 +1,23 @@
+---
+# grafana
+grafana_url_key: "https://apt.grafana.com/gpg.key"
+grafana_dest_key: /usr/share/keyrings/grafana.key
+grafana_url_repo: "https://apt.grafana.com"
+grafana_admin_password: "Password123!"
+grafana_config: grafana.ini
+
+# prometheus
+prometheus_dir_conf: /etc/prometheus
+prometheus_dir_cl: /etc/prometheus/console_libraries
+prometheus_dir_c: /etc/prometheus/consoles
+
+# mariadb
+mysql_root_password: "mysql_root_password"
+mysql_db: mysql_db
+mysql_user: mysql_user
+mysql_password: "mysql_pass"
+
+# node_exporter
+node_url: "https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz"
+node_user: node_exporter
+node_dir_conf: /etc/systemd/system

@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+{% for client in groups['clientes'] %}
+  - job_name: "{{ hostvars[client]['nodo'] }}"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["{{ hostvars[client]['inventory_hostname'] }}:9100"]
+{% endfor %}

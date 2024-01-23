@@ -1,0 +1,36 @@
+---
+- name: Incluye el archivo con las variables
+  ansible.builtin.include_vars:
+    file: vars_main.yml
+
+- name: Creando group "{{ node_user }}"
+  ansible.builtin.group:
+    name: "{{ node_user }}"
+    state: present
+
+- name: Creando usuario para servicio
+  ansible.builtin.user:
+    name: "{{ node_user }}"
+    shell: /bin/false
+    group: "{{ node_user }}"
+    system: true
+    createhome: no
+
+- name: Descarga y Descomprime "{{ node_user }}"
+  ansible.builtin.unarchive:
+    src: "{{ node_url }}"
+    dest: /usr/local/bin
+    owner: root
+    group: root
+    extra_opts: --strip-components=1
+    mode: 0755
+    remote_src: true
+
+- name: copiando archivos de configuracion
+  ansible.builtin.template:
+    src: files/node_exporter.service.j2
+    dest: "{{ node_dir_conf }}/node_exporter.service"
+    mode: 0755
+    owner: root
+    group: "{{ node_user }}"
+  notify: servicios_exporter

@@ -1,0 +1,50 @@
+---
+- name: Incluye el archivo con las variables
+  ansible.builtin.include_vars:
+    file: vars_main.yml
+
+- name: actualizando e instalando prometheus
+  ansible.builtin.apt:
+    name: [ 'prometheus' ]
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: creando directorios para archivos
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - /etc/prometheus/console_libraries
+    - /etc/prometheus/consoles
+
+- name: copiando archivos
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - { src: files/console_libraries/menu.lib, dest: "{{ prometheus_dir_cl }}/menu.lib" }
+    - { src: files/console_libraries/prom.lib, dest: "{{ prometheus_dir_cl }}/prom.lib" }
+    - { src: files/consoles/index.html.example, dest: "{{ prometheus_dir_c }}/index.html.example" }
+    - { src: files/consoles/node-cpu.html, dest: "{{ prometheus_dir_c }}/node-cpu.html" }
+    - { src: files/consoles/node-disk.html, dest: "{{ prometheus_dir_c }}/node-disk.html" }
+    - { src: files/consoles/node-overview.html, dest: "{{ prometheus_dir_c }}/node-overview.html" }
+    - { src: files/consoles/node.html, dest: "{{ prometheus_dir_c }}/node.html" }
+    - { src: files/consoles/prometheus-overview.html, dest: "{{ prometheus_dir_c }}/prometheus-overview.html" }
+    - { src: files/consoles/prometheus.html, dest: "{{ prometheus_dir_c }}/prometheus.html" }
+
+- name: copiando archivos de configuracion
+  ansible.builtin.template:
+    src: files/prometheus.yml.j2
+    dest: "{{ prometheus_dir_conf }}/prometheus.yml"
+    mode: 0755
+    owner: prometheus
+    group: prometheus
+  notify: servicios_prometheus
+
